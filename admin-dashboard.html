@@ -438,7 +438,7 @@
         <div class="navbar-right">
             <div class="user-info">
                 <div class="avatar">A</div>
-                <span id="adminEmail">admin@demo.com</span>
+                <span id="adminEmail"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="93f2f7fefafdd3f7f6fefcbdf0fcfe">[email&#160;protected]</a></span>
             </div>
             <button class="btn-logout" onclick="logout()">Sign Out</button>
         </div>
@@ -447,9 +447,14 @@
     <div class="container">
         <div class="header-section">
             <h2>Customer Management</h2>
-            <button class="btn-primary" onclick="openAddCustomerModal()">
-                ➕ Add New Customer
-            </button>
+            <div style="display: flex; gap: 12px; align-items: center;">
+                <select id="quickEditCustomer" style="padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 14px; min-width: 200px;">
+                    <option value="">Quick Edit Script...</option>
+                </select>
+                <button class="btn-primary" onclick="openAddCustomerModal()">
+                    ➕ Add New Customer
+                </button>
+            </div>
         </div>
 
         <div class="stats-grid">
@@ -555,13 +560,13 @@
         </div>
     </div>
 
-    <script type="module">
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
         import { getFirestore, collection, addDoc, getDocs, doc, getDoc, updateDoc, deleteDoc, query, where, orderBy, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
         // Firebase Configuration
-       const firebaseConfig = {
+        const firebaseConfig = {
   apiKey: "AIzaSyCtDYCRyIT-5n6iuj1GSlO3X6eQVeVtYLk",
   authDomain: "scriptmuse-23248.firebaseapp.com",
   projectId: "scriptmuse-23248",
@@ -569,6 +574,7 @@
   messagingSenderId: "539204106162",
   appId: "1:539204106162:web:82163e5c6f94460b4ed6ab",
   measurementId: "G-M19WRLM9R5"
+};
         };
 
         const app = initializeApp(firebaseConfig);
@@ -641,6 +647,17 @@
                     document.getElementById('totalCustomers').textContent = querySnapshot.size;
                     document.getElementById('activeCustomers').textContent = activeCount;
                     document.getElementById('totalScripts').textContent = querySnapshot.size;
+
+                    // Populate quick edit dropdown
+                    const quickEditSelect = document.getElementById('quickEditCustomer');
+                    quickEditSelect.innerHTML = '<option value="">Quick Edit Script...</option>';
+                    querySnapshot.forEach((doc) => {
+                        const customer = doc.data();
+                        const option = document.createElement('option');
+                        option.value = doc.id;
+                        option.textContent = customer.companyName;
+                        quickEditSelect.appendChild(option);
+                    });
                 }
             } catch (error) {
                 console.error('Error loading customers:', error);
@@ -790,6 +807,14 @@
             }
         };
 
+        // Quick edit customer script from dropdown
+        document.getElementById('quickEditCustomer').addEventListener('change', function() {
+            const customerId = this.value;
+            if (customerId) {
+                window.location.href = `script-editor.html?customerId=${customerId}`;
+            }
+        });
+
         // Default script sections
         function getDefaultScriptSections() {
             return [
@@ -807,14 +832,4 @@
                 },
                 {
                     title: "Handling Objections",
-                    content: "Common objections and responses..."
-                },
-                {
-                    title: "Closing",
-                    content: "What do you think? The next step would be..."
-                }
-            ];
-        }
-    </script>
-</body>
-</html>
+                    content: "Common objections and responses...
